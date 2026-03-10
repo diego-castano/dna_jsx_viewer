@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSX Viewer — DNA</title>
+  <link rel="stylesheet" href="design_system/dna-design-system-v2.css">
+
+  <!-- Prism.js for JSX syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+  <style>
+    /* ── Layout ── */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--surface-primary, #F0EFEB);
+      font-family: var(--font-body, 'DM Sans', sans-serif);
+      color: var(--label-primary, #030000);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: var(--surface-brand, #2C4135);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .topbar__logo {
+      font-family: var(--font-display, 'Playfair Display', serif);
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(240,239,235,0.5);
+      text-transform: uppercase;
+    }
+    .topbar__title {
+      font-family: var(--font-display, 'Playfair Display', serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--label-on-dark, #F0EFEB);
+      letter-spacing: -0.01em;
+    }
+    .topbar__badge {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(131,198,163,0.15);
+      color: var(--color-accent-mint, #83C6A3);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill, 980px);
+    }
+    .topbar__status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(240,239,235,0.5);
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    }
+    .topbar__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent-mint, #83C6A3);
+      animation: pulse-dot 2s infinite;
+    }
+    .topbar__dot--offline {
+      background: var(--color-warning, #FF9500);
+      animation: none;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Main Layout ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar (Left) ── */
+    .sidebar-panel {
+      width: 340px;
+      min-width: 280px;
+      background: var(--surface-secondary, #FAFAF8);
+      border-right: 1px solid var(--separator-default, rgba(3,0,0,0.08));
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-panel__header {
+      padding: 20px 20px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-panel__title {
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+    }
+
+    /* ── Upload Zone ── */
+    .upload-area {
+      margin: 0 20px 16px;
+      border: 2px dashed var(--separator-strong, rgba(3,0,0,0.15));
+      border-radius: var(--radius-lg, 16px);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 320ms cubic-bezier(0.4, 0, 0.6, 1);
+      background: transparent;
+      position: relative;
+    }
+    .upload-area:hover,
+    .upload-area.is-dragover {
+      border-color: var(--color-accent-mint, #83C6A3);
+      background: rgba(131,198,163,0.06);
+      box-shadow: 0 0 40px rgba(131,198,163,0.12);
+    }
+    .upload-area.is-uploading {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .upload-area__icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    .upload-area__text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--label-secondary, #333);
+      margin: 0 0 2px;
+    }
+    .upload-area__hint {
+      font-size: 11px;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+      margin: 0;
+    }
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* ── Upload progress ── */
+    .upload-progress {
+      margin: -8px 20px 16px;
+      height: 3px;
+      background: rgba(3,0,0,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
+    }
+    .upload-progress.is-active {
+      display: block;
+    }
+    .upload-progress__bar {
+      height: 100%;
+      background: var(--color-accent-mint, #83C6A3);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ── File List ── */
+    .file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 12px 20px;
+    }
+
+    .file-list__group-label {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+      padding: 12px 8px 6px;
+      position: sticky;
+      top: 0;
+      background: var(--surface-secondary, #FAFAF8);
+      z-index: 1;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md, 12px);
+      cursor: pointer;
+      transition: all 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+      border: 1px solid transparent;
+      position: relative;
+    }
+    .file-item:hover {
+      background: var(--surface-tertiary, #FFFFFF);
+      box-shadow: var(--shadow-sm, 0 2px 8px rgba(3,0,0,0.06));
+    }
+    .file-item.is-active {
+      background: var(--surface-tertiary, #FFFFFF);
+      border-color: var(--color-accent-mint, #83C6A3);
+      box-shadow: var(--shadow-sm, 0 2px 8px rgba(3,0,0,0.06)), 0 0 0 3px rgba(131,198,163,0.15);
+    }
+    .file-item.is-loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .file-item__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md, 12px);
+      background: linear-gradient(135deg, #C9E5C3 0%, #83C6A3 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--surface-brand, #2C4135);
+      font-weight: 700;
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 11px;
+    }
+
+    .file-item__info {
+      flex: 1;
+      min-width: 0;
+    }
+    .file-item__name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--label-primary, #030000);
+      letter-spacing: -0.016em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-item__meta {
+      font-size: 11px;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .file-item__size {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 10px;
+    }
+    .file-item__cloud {
+      font-size: 10px;
+      color: var(--color-accent-mint, #83C6A3);
+    }
+
+    .file-item__delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,59,48,0.08);
+      color: var(--color-error, #FF3B30);
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 200ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .file-item:hover .file-item__delete {
+      opacity: 1;
+    }
+    .file-item__delete:hover {
+      background: rgba(255,59,48,0.15);
+    }
+
+    /* ── Viewer Panel (Right) ── */
+    .viewer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--surface-primary, #F0EFEB);
+    }
+
+    .viewer__toolbar {
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--separator-default, rgba(3,0,0,0.08));
+      background: var(--surface-secondary, #FAFAF8);
+      flex-shrink: 0;
+    }
+    .viewer__filename {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--label-primary, #030000);
+      flex: 1;
+    }
+    .viewer__line-count {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 11px;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+    }
+
+    .viewer__actions {
+      display: flex;
+      gap: 8px;
+    }
+    .viewer__btn {
+      font-family: var(--font-body, 'DM Sans', sans-serif);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill, 980px);
+      border: 1px solid var(--separator-default, rgba(3,0,0,0.08));
+      background: var(--surface-tertiary, #FFFFFF);
+      color: var(--label-secondary, #333);
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .viewer__btn:hover {
+      background: var(--surface-brand, #2C4135);
+      color: var(--label-on-dark, #F0EFEB);
+      border-color: var(--surface-brand, #2C4135);
+    }
+    .viewer__btn--active {
+      background: var(--surface-brand, #2C4135);
+      color: var(--label-on-dark, #F0EFEB);
+      border-color: var(--surface-brand, #2C4135);
+    }
+
+    /* ── Code Container ── */
+    .viewer__code-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 0;
+      position: relative;
+    }
+
+    .viewer__code-wrap pre {
+      margin: 0;
+      padding: 24px;
+      min-height: 100%;
+      font-size: 13px;
+      line-height: 1.6;
+      tab-size: 2;
+      border-radius: 0;
+      background: #1d1f21 !important;
+    }
+
+    .viewer__code-wrap code {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace) !important;
+      font-size: 13px !important;
+    }
+
+    .viewer__code-wrap pre.line-numbers {
+      padding-left: 60px;
+    }
+
+    /* ── Raw mode (textarea) ── */
+    .viewer__raw {
+      flex: 1;
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 24px;
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 13px;
+      line-height: 1.6;
+      tab-size: 2;
+      background: #1d1f21;
+      color: #c5c8c6;
+      display: none;
+    }
+
+    /* ── Loading spinner in viewer ── */
+    .viewer__loading {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+      display: none;
+    }
+    .viewer__loading.is-active {
+      display: flex;
+    }
+    .viewer__spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(3,0,0,0.08);
+      border-top-color: var(--color-accent-mint, #83C6A3);
+      border-radius: 50%;
+      animation: spin 800ms linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Empty State ── */
+    .viewer__empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+    }
+    .viewer__empty-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+    .viewer__empty-text {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .viewer__empty-hint {
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface-brand, #2C4135);
+      color: var(--label-on-dark, #F0EFEB);
+      padding: 10px 24px;
+      border-radius: var(--radius-pill, 980px);
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-xl, 0 16px 48px rgba(3,0,0,0.12));
+      z-index: 500;
+      transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .toast.is-visible {
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast--error {
+      background: var(--color-error, #FF3B30);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 734px) {
+      .main {
+        flex-direction: column;
+      }
+      .sidebar-panel {
+        width: 100%;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid var(--separator-default, rgba(3,0,0,0.08));
+      }
+      .viewer__actions { flex-wrap: wrap; }
+    }
+
+    /* ── Scrollbar styling ── */
+    .file-list::-webkit-scrollbar,
+    .viewer__code-wrap::-webkit-scrollbar,
+    .viewer__raw::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .file-list::-webkit-scrollbar-track,
+    .viewer__code-wrap::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .file-list::-webkit-scrollbar-thumb {
+      background: rgba(3,0,0,0.12);
+      border-radius: 3px;
+    }
+    .viewer__code-wrap::-webkit-scrollbar-thumb,
+    .viewer__raw::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+    }
+
+    /* ── Search ── */
+    .sidebar-search {
+      margin: 0 20px 12px;
+      position: relative;
+    }
+    .sidebar-search__icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .sidebar-search__input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1px solid var(--separator-default, rgba(3,0,0,0.08));
+      border-radius: var(--radius-pill, 980px);
+      background: var(--surface-tertiary, #FFFFFF);
+      font-family: var(--font-body, 'DM Sans', sans-serif);
+      font-size: 12px;
+      color: var(--label-primary, #030000);
+      outline: none;
+      transition: all 200ms;
+    }
+    .sidebar-search__input:focus {
+      border-color: var(--color-accent-mint, #83C6A3);
+      box-shadow: 0 0 0 3px rgba(131,198,163,0.15);
+    }
+    .sidebar-search__input::placeholder {
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+    }
+
+    /* ── File count ── */
+    .sidebar-panel__count {
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      font-size: 10px;
+      color: var(--label-tertiary, rgba(3,0,0,0.45));
+      padding: 0 20px 8px;
+    }
+
+    /* ── Word wrap toggle ── */
+    .viewer__code-wrap pre.wrap-lines code {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <span class="topbar__logo">DNA</span>
+    <span class="topbar__title">JSX Viewer</span>
+    <span class="topbar__badge">v2.0</span>
+    <div class="topbar__status" id="cloudStatus">
+      <span class="topbar__dot" id="cloudDot"></span>
+      <span id="cloudLabel">Cloudinary</span>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main">
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar-panel">
+      <div class="sidebar-panel__header">
+        <div class="sidebar-panel__title">Files</div>
+      </div>
+
+      <!-- Search -->
+      <div class="sidebar-search">
+        <span class="sidebar-search__icon">&#x1F50D;</span>
+        <input class="sidebar-search__input" id="searchInput" type="text" placeholder="Search files...">
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-area" id="uploadZone">
+        <div class="upload-area__icon">&#x2601;</div>
+        <p class="upload-area__text">Drop .jsx files here</p>
+        <p class="upload-area__hint">Uploads to cloud — visible to everyone</p>
+        <input type="file" id="fileInput" accept=".jsx,.js,.tsx,.ts" multiple>
+      </div>
+
+      <!-- Upload Progress -->
+      <div class="upload-progress" id="uploadProgress">
+        <div class="upload-progress__bar" id="uploadProgressBar"></div>
+      </div>
+
+      <!-- File Count -->
+      <div class="sidebar-panel__count" id="fileCount">Loading...</div>
+
+      <!-- File List -->
+      <div class="file-list" id="fileList"></div>
+    </aside>
+
+    <!-- Right Viewer -->
+    <div class="viewer">
+      <!-- Toolbar (hidden when no file selected) -->
+      <div class="viewer__toolbar" id="viewerToolbar" style="display:none;">
+        <span class="viewer__filename" id="viewerFilename"></span>
+        <span class="viewer__line-count" id="viewerLineCount"></span>
+        <div class="viewer__actions">
+          <button class="viewer__btn viewer__btn--active" id="btnHighlight" title="Syntax highlighted">Highlight</button>
+          <button class="viewer__btn" id="btnRaw" title="Raw text">Raw</button>
+          <button class="viewer__btn" id="btnWrap" title="Toggle word wrap">Wrap</button>
+          <button class="viewer__btn" id="btnCopy" title="Copy to clipboard">Copy</button>
+          <button class="viewer__btn" id="btnDownload" title="Download file">Download</button>
+        </div>
+      </div>
+
+      <!-- Code view -->
+      <div class="viewer__code-wrap" id="codeWrap" style="display:none;">
+        <pre><code class="language-jsx" id="codeBlock"></code></pre>
+      </div>
+
+      <!-- Raw textarea -->
+      <textarea class="viewer__raw" id="rawView" readonly></textarea>
+
+      <!-- Loading state -->
+      <div class="viewer__loading" id="viewerLoading">
+        <div class="viewer__spinner"></div>
+        <span>Loading file...</span>
+      </div>
+
+      <!-- Empty state -->
+      <div class="viewer__empty" id="emptyState">
+        <div class="viewer__empty-icon">{ }</div>
+        <div class="viewer__empty-text">Select a file to view</div>
+        <div class="viewer__empty-hint">Upload .jsx files or select from the list</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Prism.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // ═══════════════════════════════════════
+    // CLOUDINARY CONFIG
+    // Uses Upload API only (CORS-safe from browser)
+    // Manifest pattern: a _manifest.json on Cloudinary
+    // acts as the "database" of files
+    // ═══════════════════════════════════════
+    const CLOUD_NAME  = 'dfoam6k70';
+    const API_KEY     = '796176858467439';
+    const API_SECRET  = 'ZWt79nHVyQjqEcLMCKtOibnuMAQ';
+    const FOLDER      = 'jsx_viewer';
+    const MANIFEST_ID = FOLDER + '/_manifest.json';
+
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    let files = [];        // { name, date, size, url, content? (lazy cached) }
+    let activeFileName = null;
+    let activeContent = null;
+    let viewMode = 'highlight';
+    let wrapLines = false;
+
+    // ═══════════════════════════════════════
+    // DOM REFS
+    // ═══════════════════════════════════════
+    const $ = id => document.getElementById(id);
+    const fileListEl     = $('fileList');
+    const fileCountEl    = $('fileCount');
+    const fileInput      = $('fileInput');
+    const uploadZone     = $('uploadZone');
+    const uploadProgress = $('uploadProgress');
+    const uploadProgressBar = $('uploadProgressBar');
+    const searchInput    = $('searchInput');
+    const viewerToolbar  = $('viewerToolbar');
+    const viewerFilename = $('viewerFilename');
+    const viewerLineCount= $('viewerLineCount');
+    const codeWrap       = $('codeWrap');
+    const codeBlock      = $('codeBlock');
+    const rawView        = $('rawView');
+    const viewerLoading  = $('viewerLoading');
+    const emptyState     = $('emptyState');
+    const btnHighlight   = $('btnHighlight');
+    const btnRaw         = $('btnRaw');
+    const btnWrap        = $('btnWrap');
+    const btnCopy        = $('btnCopy');
+    const btnDownload    = $('btnDownload');
+    const toastEl        = $('toast');
+    const cloudDot       = $('cloudDot');
+    const cloudLabel     = $('cloudLabel');
+
+    // ═══════════════════════════════════════
+    // CRYPTO: SHA-1 via Web Crypto API
+    // ═══════════════════════════════════════
+    async function sha1(message) {
+      const buf = new TextEncoder().encode(message);
+      const hash = await crypto.subtle.digest('SHA-1', buf);
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    async function generateSignature(params) {
+      const sorted = Object.keys(params).sort()
+        .map(k => k + '=' + params[k])
+        .join('&');
+      return await sha1(sorted + API_SECRET);
+    }
+
+    // ═══════════════════════════════════════
+    // CLOUDINARY: UPLOAD (CORS-safe)
+    // ═══════════════════════════════════════
+    async function cloudUpload(publicId, content, contentType) {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const params = {
+        overwrite: 'true',
+        public_id: publicId,
+        tags: 'jsx_viewer',
+        timestamp: timestamp.toString()
+      };
+      const signature = await generateSignature(params);
+
+      const fd = new FormData();
+      fd.append('file', new Blob([content], { type: contentType || 'text/plain' }));
+      fd.append('api_key', API_KEY);
+      fd.append('timestamp', timestamp);
+      fd.append('signature', signature);
+      fd.append('public_id', publicId);
+      fd.append('tags', 'jsx_viewer');
+      fd.append('overwrite', 'true');
+      fd.append('resource_type', 'raw');
+
+      const res = await fetch(
+        'https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/raw/upload',
+        { method: 'POST', body: fd }
+      );
+      if (!res.ok) throw new Error('Upload failed: ' + (await res.text()));
+      return await res.json();
+    }
+
+    // ═══════════════════════════════════════
+    // MANIFEST: Read / Write
+    // The manifest is a JSON file on Cloudinary
+    // listing all JSX files with metadata.
+    // ═══════════════════════════════════════
+    async function loadManifest() {
+      try {
+        // Fetch with cache-busting to always get latest
+        const url = 'https://res.cloudinary.com/' + CLOUD_NAME +
+          '/raw/upload/' + MANIFEST_ID + '?v=' + Date.now();
+        const res = await fetch(url);
+        if (!res.ok) {
+          if (res.status === 404) return []; // No manifest yet
+          throw new Error('Manifest fetch failed: ' + res.status);
+        }
+        const data = await res.json();
+        setOnline(true);
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        console.warn('Manifest load failed:', e);
+        setOnline(false);
+        return [];
+      }
+    }
+
+    async function saveManifest(entries) {
+      // entries = [{ name, date, size, url }, ...]
+      const json = JSON.stringify(entries, null, 2);
+      await cloudUpload(MANIFEST_ID, json, 'application/json');
+    }
+
+    // ═══════════════════════════════════════
+    // STATUS
+    // ═══════════════════════════════════════
+    function setOnline(online) {
+      cloudDot.className = online ? 'topbar__dot' : 'topbar__dot topbar__dot--offline';
+      cloudLabel.textContent = online ? 'Cloudinary' : 'Offline';
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    async function init() {
+      setupEvents();
+      fileCountEl.textContent = 'Loading...';
+
+      const manifest = await loadManifest();
+      files = manifest.map(f => ({
+        name: f.name,
+        date: f.date,
+        size: f.size,
+        url: f.url,
+        content: null // lazy loaded
+      }));
+      sortFiles();
+      renderFileList();
+    }
+
+    // ═══════════════════════════════════════
+    // SORTING & FORMATTING
+    // ═══════════════════════════════════════
+    function sortFiles() {
+      files.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function groupByMonth(list) {
+      const groups = {};
+      list.forEach(f => {
+        const d = new Date(f.date);
+        const key = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(f);
+      });
+      return groups;
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER FILE LIST
+    // ═══════════════════════════════════════
+    function renderFileList(filter) {
+      filter = filter || '';
+      const filtered = filter
+        ? files.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()))
+        : files;
+
+      fileCountEl.textContent = filtered.length + ' file' + (filtered.length !== 1 ? 's' : '');
+
+      const groups = groupByMonth(filtered);
+      let html = '';
+
+      for (const month in groups) {
+        html += '<div class="file-list__group-label">' + month + '</div>';
+        groups[month].forEach(function(f) {
+          var ext = f.name.split('.').pop().toUpperCase();
+          var active = f.name === activeFileName;
+          var safeName = f.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          html += '<div class="file-item ' + (active ? 'is-active' : '') + '" ' +
+            'onclick="window.__selectFile(\'' + safeName + '\')">' +
+            '<div class="file-item__icon">' + ext + '</div>' +
+            '<div class="file-item__info">' +
+              '<div class="file-item__name" title="' + safeName + '">' + f.name + '</div>' +
+              '<div class="file-item__meta">' +
+                '<span>' + formatDate(f.date) + '</span>' +
+                '<span class="file-item__size">' + formatSize(f.size) + '</span>' +
+                '<span class="file-item__cloud">&#x2601;</span>' +
+              '</div>' +
+            '</div>' +
+            '<button class="file-item__delete" onclick="event.stopPropagation(); window.__deleteFile(\'' + safeName + '\')" title="Remove">&times;</button>' +
+            '</div>';
+        });
+      }
+
+      if (!filtered.length) {
+        html = '<div style="text-align:center;padding:40px 20px;color:var(--label-tertiary);font-size:13px;">No files found</div>';
+      }
+
+      fileListEl.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════
+    // SELECT FILE (lazy load content)
+    // ═══════════════════════════════════════
+    window.__selectFile = async function(name) {
+      activeFileName = name;
+      var file = files.find(function(f) { return f.name === name; });
+      if (!file) return;
+
+      renderFileList(searchInput.value);
+
+      // Cached content
+      if (file.content) {
+        activeContent = file.content;
+        showFile(file);
+        return;
+      }
+
+      // Lazy load from Cloudinary
+      showViewerLoading();
+      viewerToolbar.style.display = 'flex';
+      viewerFilename.textContent = file.name;
+      viewerLineCount.textContent = 'Loading...';
+
+      try {
+        var res = await fetch(file.url);
+        if (!res.ok) throw new Error(res.status);
+        var content = await res.text();
+        file.content = content;
+        activeContent = content;
+        showFile(file);
+      } catch (e) {
+        console.error('Fetch failed:', e);
+        showToast('Failed to load file', true);
+        showEmpty();
+      }
+    };
+
+    // ═══════════════════════════════════════
+    // DELETE FILE (removes from manifest)
+    // ═══════════════════════════════════════
+    window.__deleteFile = async function(name) {
+      if (!confirm('Remove "' + name + '" from the viewer?')) return;
+
+      files = files.filter(function(f) { return f.name !== name; });
+
+      if (activeFileName === name) {
+        activeFileName = null;
+        activeContent = null;
+        showEmpty();
+      }
+
+      renderFileList(searchInput.value);
+      showToast('Removing...');
+
+      try {
+        await saveManifest(files.map(function(f) {
+          return { name: f.name, date: f.date, size: f.size, url: f.url };
+        }));
+        showToast(name + ' removed');
+      } catch (e) {
+        showToast('Failed to update manifest', true);
+      }
+    };
+
+    // ═══════════════════════════════════════
+    // SHOW FILE CONTENT
+    // ═══════════════════════════════════════
+    function showFile(file) {
+      emptyState.style.display = 'none';
+      viewerLoading.classList.remove('is-active');
+      viewerToolbar.style.display = 'flex';
+
+      viewerFilename.textContent = file.name;
+      var lines = file.content.split('\n').length;
+      viewerLineCount.textContent = lines + ' lines';
+
+      var ext = file.name.split('.').pop().toLowerCase();
+      var langMap = { jsx: 'jsx', tsx: 'tsx', js: 'javascript', ts: 'typescript' };
+      var lang = langMap[ext] || 'javascript';
+
+      codeBlock.className = 'language-' + lang;
+      codeBlock.textContent = file.content;
+      rawView.value = file.content;
+
+      if (typeof Prism !== 'undefined') {
+        Prism.highlightElement(codeBlock);
+      }
+
+      setViewMode(viewMode);
+    }
+
+    // ═══════════════════════════════════════
+    // VIEW STATES
+    // ═══════════════════════════════════════
+    function showEmpty() {
+      emptyState.style.display = 'flex';
+      viewerToolbar.style.display = 'none';
+      codeWrap.style.display = 'none';
+      rawView.style.display = 'none';
+      viewerLoading.classList.remove('is-active');
+    }
+
+    function showViewerLoading() {
+      emptyState.style.display = 'none';
+      codeWrap.style.display = 'none';
+      rawView.style.display = 'none';
+      viewerLoading.classList.add('is-active');
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      if (mode === 'highlight') {
+        codeWrap.style.display = 'block';
+        rawView.style.display = 'none';
+        btnHighlight.classList.add('viewer__btn--active');
+        btnRaw.classList.remove('viewer__btn--active');
+      } else {
+        codeWrap.style.display = 'none';
+        rawView.style.display = 'block';
+        btnHighlight.classList.remove('viewer__btn--active');
+        btnRaw.classList.add('viewer__btn--active');
+      }
+    }
+
+    function toggleWrap() {
+      wrapLines = !wrapLines;
+      codeWrap.querySelector('pre').classList.toggle('wrap-lines', wrapLines);
+      btnWrap.classList.toggle('viewer__btn--active', wrapLines);
+    }
+
+    // ═══════════════════════════════════════
+    // COPY / DOWNLOAD
+    // ═══════════════════════════════════════
+    async function copyToClipboard() {
+      if (!activeContent) return;
+      try {
+        await navigator.clipboard.writeText(activeContent);
+        showToast('Copied to clipboard');
+      } catch (e) {
+        showToast('Failed to copy', true);
+      }
+    }
+
+    function downloadFile() {
+      var file = files.find(function(f) { return f.name === activeFileName; });
+      if (!file || !activeContent) return;
+      var blob = new Blob([activeContent], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Downloading ' + file.name);
+    }
+
+    // ═══════════════════════════════════════
+    // UPLOAD HANDLER
+    // 1. Upload file to Cloudinary
+    // 2. Add to manifest
+    // 3. Upload updated manifest
+    // ═══════════════════════════════════════
+    async function handleFiles(filesList) {
+      var validFiles = Array.from(filesList).filter(function(f) {
+        var ext = f.name.split('.').pop().toLowerCase();
+        return ['jsx', 'js', 'tsx', 'ts'].includes(ext);
+      });
+
+      if (!validFiles.length) {
+        showToast('Only .jsx, .js, .tsx, .ts files accepted', true);
+        return;
+      }
+
+      uploadZone.classList.add('is-uploading');
+      uploadProgress.classList.add('is-active');
+
+      var completed = 0;
+      var total = validFiles.length;
+      var firstUploaded = null;
+
+      for (var i = 0; i < validFiles.length; i++) {
+        var f = validFiles[i];
+        try {
+          uploadProgressBar.style.width = ((completed / total) * 100) + '%';
+
+          var content = await readFileAsText(f);
+          var publicId = FOLDER + '/' + f.name;
+          var result = await cloudUpload(publicId, content, 'text/plain');
+
+          var newFile = {
+            name: f.name,
+            date: new Date().toISOString().split('T')[0],
+            size: result.bytes,
+            url: result.secure_url,
+            content: content
+          };
+
+          // Replace if same name exists
+          files = files.filter(function(x) { return x.name !== f.name; });
+          files.push(newFile);
+
+          completed++;
+          uploadProgressBar.style.width = ((completed / total) * 100) + '%';
+          showToast(f.name + ' uploaded');
+
+          if (!firstUploaded) firstUploaded = newFile;
+
+        } catch (e) {
+          console.error('Upload failed:', f.name, e);
+          showToast('Failed: ' + f.name, true);
+          completed++;
+        }
+      }
+
+      // Save updated manifest to Cloudinary
+      try {
+        await saveManifest(files.map(function(f) {
+          return { name: f.name, date: f.date, size: f.size, url: f.url };
+        }));
+      } catch (e) {
+        console.error('Manifest save failed:', e);
+        showToast('Warning: manifest sync failed', true);
+      }
+
+      sortFiles();
+      renderFileList(searchInput.value);
+
+      // Auto-select first uploaded
+      if (firstUploaded) {
+        activeFileName = firstUploaded.name;
+        activeContent = firstUploaded.content;
+        showFile(firstUploaded);
+        renderFileList(searchInput.value);
+      }
+
+      setOnline(true);
+
+      setTimeout(function() {
+        uploadZone.classList.remove('is-uploading');
+        uploadProgress.classList.remove('is-active');
+        uploadProgressBar.style.width = '0%';
+      }, 600);
+    }
+
+    function readFileAsText(file) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) { resolve(e.target.result); };
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // TOAST
+    // ═══════════════════════════════════════
+    var toastTimer;
+    function showToast(msg, isError) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast is-visible' + (isError ? ' toast--error' : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() {
+        toastEl.classList.remove('is-visible');
+      }, 2500);
+    }
+
+    // ═══════════════════════════════════════
+    // EVENTS
+    // ═══════════════════════════════════════
+    function setupEvents() {
+      fileInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+        fileInput.value = '';
+      });
+
+      uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadZone.classList.add('is-dragover');
+      });
+      uploadZone.addEventListener('dragleave', function() {
+        uploadZone.classList.remove('is-dragover');
+      });
+      uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('is-dragover');
+        handleFiles(e.dataTransfer.files);
+      });
+
+      document.body.addEventListener('dragover', function(e) { e.preventDefault(); });
+      document.body.addEventListener('drop', function(e) {
+        e.preventDefault();
+        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+      });
+
+      searchInput.addEventListener('input', function() {
+        renderFileList(searchInput.value);
+      });
+
+      btnHighlight.addEventListener('click', function() { setViewMode('highlight'); });
+      btnRaw.addEventListener('click', function() { setViewMode('raw'); });
+      btnWrap.addEventListener('click', toggleWrap);
+      btnCopy.addEventListener('click', copyToClipboard);
+      btnDownload.addEventListener('click', downloadFile);
+    }
+
+    // ═══════════════════════════════════════
+    // BOOT
+    // ═══════════════════════════════════════
+    init();
+
+  })();
+  </script>
+
+</body>
+</html>
