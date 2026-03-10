@@ -769,9 +769,16 @@
     // ═══════════════════════════════════════
     async function loadManifest() {
       try {
-        // Fetch with cache-busting to always get latest
-        const url = 'https://res.cloudinary.com/' + CLOUD_NAME +
-          '/raw/upload/' + MANIFEST_ID + '?v=' + Date.now();
+        // Use stored version for guaranteed CDN cache busting
+        var storedVersion = localStorage.getItem('manifestVersion');
+        var url;
+        if (storedVersion) {
+          url = 'https://res.cloudinary.com/' + CLOUD_NAME +
+            '/raw/upload/v' + storedVersion + '/' + MANIFEST_ID;
+        } else {
+          url = 'https://res.cloudinary.com/' + CLOUD_NAME +
+            '/raw/upload/' + MANIFEST_ID + '?nocache=' + Date.now();
+        }
         const res = await fetch(url);
         if (!res.ok) {
           if (res.status === 404) return []; // No manifest yet
@@ -790,7 +797,11 @@
     async function saveManifest(entries) {
       // entries = [{ name, date, size, url }, ...]
       const json = JSON.stringify(entries, null, 2);
-      await cloudUpload(MANIFEST_ID, json, 'application/json');
+      const result = await cloudUpload(MANIFEST_ID, json, 'application/json');
+      // Store version so next loadManifest() fetches the exact updated version
+      if (result && result.version) {
+        localStorage.setItem('manifestVersion', result.version);
+      }
     }
 
     // ═══════════════════════════════════════
@@ -1083,7 +1094,7 @@
 
           var newFile = {
             name: f.name,
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toISOString(),
             size: result.bytes,
             url: result.secure_url,
             content: content
