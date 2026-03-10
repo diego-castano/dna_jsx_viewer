@@ -264,13 +264,6 @@
     .viewer__meta-field:focus { border-color: var(--color-accent-mint, #83C6A3); background: #fff; }
     .viewer__meta-title { flex: 0 0 200px; font-weight: 600; }
     .viewer__meta-desc { flex: 1; font-style: italic; color: var(--label-secondary); }
-    .viewer__meta-save {
-      font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 10px;
-      padding: 4px 12px; border-radius: 980px; border: none; cursor: pointer;
-      background: var(--color-accent-mint, #83C6A3); color: var(--surface-brand, #2C4135);
-      font-weight: 700; opacity: 0; transition: opacity 200ms; pointer-events: none;
-    }
-    .viewer__meta-save.is-dirty { opacity: 1; pointer-events: auto; }
 
     /* ── Code view ── */
     .viewer__code-wrap { flex: 1; overflow: auto; display: none; }
@@ -421,7 +414,6 @@
       <div class="viewer__meta" id="metaBar">
         <input class="viewer__meta-field viewer__meta-title" id="metaTitle" placeholder="Add a title..." maxlength="100">
         <input class="viewer__meta-field viewer__meta-desc" id="metaDesc" placeholder="Add a description...">
-        <button class="viewer__meta-save" id="metaSave">Save</button>
       </div>
 
       <!-- Visual preview -->
@@ -492,7 +484,7 @@
     const visualView = $('visualView'), previewFrame = $('previewFrame');
     const previewError = $('previewError'), previewErrorMsg = $('previewErrorMsg');
     const loadingEl = $('loading'), emptyState = $('emptyState');
-    const metaBar = $('metaBar'), metaTitle = $('metaTitle'), metaDesc = $('metaDesc'), metaSave = $('metaSave');
+    const metaBar = $('metaBar'), metaTitle = $('metaTitle'), metaDesc = $('metaDesc');
     const btnVisual = $('btnVisual'), btnCode = $('btnCode'), btnRaw = $('btnRaw');
     const btnWrap = $('btnWrap'), btnCopy = $('btnCopy'), btnDownload = $('btnDownload');
     const toastEl = $('toast');
@@ -614,7 +606,7 @@
       metaTitle.value = file.title || '';
       metaDesc.value = file.description || '';
       metaDirty = false;
-      metaSave.classList.remove('is-dirty');
+      clearTimeout(metaSaveTimer);
       metaBar.classList.add('is-visible');
 
       // Show loading
@@ -666,6 +658,9 @@
       previewError.classList.remove('is-visible');
 
       [btnVisual, btnCode, btnRaw].forEach(b => b.classList.remove('viewer__btn--active'));
+
+      // Wrap button only visible in Code mode
+      btnWrap.style.display = (mode === 'code') ? '' : 'none';
 
       if (mode === 'visual') {
         btnVisual.classList.add('viewer__btn--active');
@@ -839,8 +834,9 @@
     }
 
     // ═══════════════════════════════════════
-    // SAVE META (title / description)
+    // SAVE META (autosave with debounce)
     // ═══════════════════════════════════════
+    let metaSaveTimer;
     async function saveMeta() {
       if (!activeFile || !metaDirty) return;
       try {
@@ -849,17 +845,21 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: metaTitle.value.trim(), description: metaDesc.value.trim() }),
         });
-        // Update local state
         Object.assign(activeFile, updated);
         const idx = files.findIndex(f => f.id === activeFile.id);
         if (idx >= 0) files[idx] = activeFile;
         metaDirty = false;
-        metaSave.classList.remove('is-dirty');
         renderFileList(searchInput.value);
         showToast('Saved');
       } catch (e) {
         showToast('Save failed', true);
       }
+    }
+
+    function scheduleAutoSave() {
+      metaDirty = true;
+      clearTimeout(metaSaveTimer);
+      metaSaveTimer = setTimeout(saveMeta, 800);
     }
 
     // ═══════════════════════════════════════
@@ -932,13 +932,11 @@
       btnCopy.addEventListener('click', copyToClipboard);
       btnDownload.addEventListener('click', downloadFile);
 
-      // Meta fields
-      metaTitle.addEventListener('input', () => { metaDirty = true; metaSave.classList.add('is-dirty'); });
-      metaDesc.addEventListener('input', () => { metaDirty = true; metaSave.classList.add('is-dirty'); });
-      metaSave.addEventListener('click', saveMeta);
-      // Save on Enter
-      metaTitle.addEventListener('keydown', e => { if (e.key === 'Enter') saveMeta(); });
-      metaDesc.addEventListener('keydown', e => { if (e.key === 'Enter') saveMeta(); });
+      // Meta fields — autosave on input
+      metaTitle.addEventListener('input', scheduleAutoSave);
+      metaDesc.addEventListener('input', scheduleAutoSave);
+      metaTitle.addEventListener('blur', () => { if (metaDirty) saveMeta(); });
+      metaDesc.addEventListener('blur', () => { if (metaDirty) saveMeta(); });
 
       // Sidebar collapse/expand
       $('sidebarToggle').addEventListener('click', toggleSidebar);
