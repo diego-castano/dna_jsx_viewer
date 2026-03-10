@@ -1,14 +1,14 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-});
+const adapter = new PrismaPg(process.env.DATABASE_URL);
+const prisma = new PrismaClient({ adapter });
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 // ── Cloudinary config ──
@@ -151,7 +151,7 @@ app.get('/api/files/:id/content', async (req, res) => {
 });
 
 // ── SPA fallback ──
-app.get('*', (req, res) => {
+app.get('{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
