@@ -199,7 +199,7 @@
 
     /* ── Viewer ── */
     .viewer { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; position: relative; z-index: 1; }
-    .mobile-nav { display: none !important; }
+    .mobile-nav { display: none; }
 
     .viewer__toolbar {
       padding: 12px 24px; display: flex; align-items: center; gap: 12px;
@@ -496,11 +496,12 @@
 
       /* Mobile tab bar at top of viewer */
       .mobile-nav {
-        display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+        display: none; align-items: center; gap: 8px; padding: 8px 12px;
         background: var(--surface-secondary, #FAFAF8);
         border-bottom: 1px solid var(--separator-default, rgba(3,0,0,0.08));
         flex-shrink: 0;
       }
+      .mobile-nav.is-visible { display: flex; }
       .mobile-nav__back {
         width: 32px; height: 32px; border-radius: 8px; border: none;
         background: rgba(3,0,0,0.04); display: flex; align-items: center; justify-content: center;
@@ -597,7 +598,7 @@
     <!-- Viewer -->
     <div class="viewer">
       <!-- Mobile back nav (hidden on desktop) -->
-      <div class="mobile-nav" id="mobileNav" style="display:none;">
+      <div class="mobile-nav" id="mobileNav">
         <button class="mobile-nav__back" id="mobileBack">&#x25C0;</button>
         <span class="mobile-nav__file" id="mobileFilename"></span>
       </div>
@@ -1385,14 +1386,14 @@
     function mobileShowViewer() {
       if (!isMobile()) return;
       $('sidebar').classList.add('mobile-compact');
-      mobileNav.style.display = '';  // Let CSS @media control it
+      mobileNav.classList.add('is-visible');
       mobileFilename.textContent = activeFile ? activeFile.filename : '';
     }
 
     function mobileShowSidebar() {
       if (!isMobile()) return;
       $('sidebar').classList.remove('mobile-compact');
-      mobileNav.style.display = 'none';
+      mobileNav.classList.remove('is-visible');
       toolbar.style.display = 'none';
       metaBar.classList.remove('is-visible');
       visualView.style.display = 'none';
