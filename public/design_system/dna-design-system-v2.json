@@ -1,0 +1,391 @@
+{
+  "$schema": "DNA × Apple Design System v2.0 — Elevated DNA",
+  "$version": "2.0.0",
+  "$date": "March 2026",
+  "$philosophy": "Cada pixel tiene un propósito. Cada transición cuenta una historia. La complejidad se siente simple.",
+  "$aesthetic": "Editorial organic + Apple glassmorphism + humza.aii neumorphism. DNA's serif warmth meets Apple's spatial precision.",
+
+  "principles": [
+    "CLARIDAD RADICAL — Todo comunica. Nada sobra.",
+    "PROFUNDIDAD CON PROPÓSITO — Las capas comunican jerarquía.",
+    "ORGANICIDAD CONTROLADA — Formas asimétricas DNA + grid 8px Apple.",
+    "MOVIMIENTO COMO LENGUAJE — Cada transición cuenta una historia.",
+    "CONTENIDO PRIMERO — El diseño es el escenario, el contenido el actor."
+  ],
+
+  "brand": {
+    "name": "DNA",
+    "fullName": "Digital News Agency",
+    "tagline": "The content agency with the content platform",
+    "location": "Soho Works, Television Centre, London W12 7FR",
+    "logo": {
+      "description": "Three stylized arch/bridge shapes forming 'DNA'",
+      "primary": "https://cdn.prod.website-files.com/6761c1cf2ca69a7e287fb60c/6761c22d484908538a9115bb_Group%2025.avif",
+      "footer": "https://cdn.prod.website-files.com/6761c1cf2ca69a7e287fb60c/6761c3303022053147db8d91_Logo%20(2).avif",
+      "navbarColor": "#F0EFEB",
+      "footerTricolor": { "d": "#4E6B4C", "n": "#FE0216", "a": "#FFFFFF" },
+      "navbarWidth": "120px"
+    },
+    "urls": {
+      "website": "https://www.dna.online",
+      "newsroom": "https://newsroom.dna.online"
+    }
+  },
+
+  "colors": {
+    "brand": {
+      "primary": "#2C4135",
+      "primaryHover": "#213328",
+      "primaryActive": "#1A2920",
+      "primarySubtle": "rgba(44, 65, 53, 0.08)"
+    },
+    "accent": {
+      "mint": "#83C6A3",
+      "mintHover": "#6BB892",
+      "mintSubtle": "rgba(131, 198, 163, 0.15)",
+      "mintMuted": "#C9E5C3",
+      "neon": "#9CE68C"
+    },
+    "signal": {
+      "red": "#FE0216",
+      "redHover": "#E50114",
+      "redSubtle": "rgba(254, 2, 22, 0.08)",
+      "pink": "#F8737D"
+    },
+    "semantic": {
+      "success": "#34C759",
+      "successSubtle": "rgba(52, 199, 89, 0.12)",
+      "warning": "#FF9500",
+      "warningSubtle": "rgba(255, 149, 0, 0.12)",
+      "error": "#FF3B30",
+      "errorSubtle": "rgba(255, 59, 48, 0.12)",
+      "info": "#83C6A3",
+      "infoSubtle": "rgba(131, 198, 163, 0.12)"
+    },
+    "label": {
+      "primary": "#030000",
+      "secondary": "#333333",
+      "tertiary": "rgba(3, 0, 0, 0.45)",
+      "quaternary": "rgba(3, 0, 0, 0.25)",
+      "onDark": "#F0EFEB",
+      "onDarkSecondary": "rgba(240, 239, 235, 0.6)"
+    },
+    "surface": {
+      "primary": "#F0EFEB",
+      "secondary": "#FAFAF8",
+      "tertiary": "#FFFFFF",
+      "elevated": "#FFFFFF",
+      "dark": "#161515",
+      "darkElevated": "#1E1E1E",
+      "brand": "#2C4135",
+      "brandLight": "#4E6B4C",
+      "gold": "#D0B371",
+      "warm": "#D9CEB8",
+      "sage": "#D3DCD1",
+      "appleGray": "#F5F5F3",
+      "pastelRose": "#FFE0DF",
+      "pastelSage": "#CBCECC",
+      "pastelSteel": "#CFD8E3",
+      "pastelCream": "#FAF7F4"
+    },
+    "glass": {
+      "light": "rgba(250, 250, 248, 0.72)",
+      "lightStrong": "rgba(250, 250, 248, 0.88)",
+      "dark": "rgba(44, 65, 53, 0.78)",
+      "darkStrong": "rgba(44, 65, 53, 0.92)",
+      "white32": "rgba(255, 255, 255, 0.32)",
+      "white16": "rgba(255, 255, 255, 0.16)",
+      "blur": "saturate(1.8) blur(20px)",
+      "blurStrong": "saturate(2) blur(40px)",
+      "innerShine": "inset 0 0.5px 0 rgba(255, 255, 255, 0.4)"
+    },
+    "separator": {
+      "default": "rgba(3, 0, 0, 0.08)",
+      "strong": "rgba(3, 0, 0, 0.15)",
+      "dark": "rgba(240, 239, 235, 0.12)",
+      "darkStrong": "rgba(240, 239, 235, 0.25)"
+    },
+    "gradients": {
+      "heroWarm": "linear-gradient(135deg, #F8737D 0%, #FE0216 20%, #D9CEB8 50%, #ABE0B2 80%, #83C6A3 100%)",
+      "sunset": "linear-gradient(135deg, #F8737D 0%, #D9CEB8 50%, #C9E5C3 100%)",
+      "mint": "linear-gradient(135deg, #C9E5C3 0%, #ABE0B2 40%, #83C6A3 100%)",
+      "forest": "linear-gradient(180deg, #2C4135 0%, #213328 100%)",
+      "surface": "linear-gradient(180deg, #FAFAF8 0%, #F0EFEB 100%)",
+      "glass": "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)"
+    }
+  },
+
+  "typography": {
+    "fontStacks": {
+      "display": "'Playfair Display', 'Ivy Presto Text', Georgia, serif",
+      "headline": "'Playfair Display', 'ivypresto-headline', Georgia, serif",
+      "body": "'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+      "editorial": "'Source Serif 4', Georgia, serif",
+      "mono": "'JetBrains Mono', 'Courier New', 'SF Mono', monospace",
+      "accent": "'Bitter', Georgia, serif"
+    },
+    "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Bitter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,300;400;500;600;700&display=swap",
+    "scale": {
+      "display":    { "size": "clamp(80px, 12vw, 200px)", "weight": 400, "leading": 0.95, "tracking": "-0.02em", "family": "display" },
+      "largeTitle": { "size": "clamp(36px, 5vw, 56px)", "weight": 700, "leading": 1.07, "tracking": "-0.015em", "family": "display" },
+      "title1":     { "size": "clamp(28px, 3.5vw, 50px)", "weight": 700, "leading": 1.1, "tracking": "-0.01em", "family": "display" },
+      "title2":     { "size": "clamp(22px, 2.5vw, 34px)", "weight": 700, "leading": 1.12, "tracking": "-0.005em", "family": "display" },
+      "title3":     { "size": "clamp(18px, 2vw, 24px)", "weight": 400, "leading": 1.2, "tracking": "0em", "family": "display" },
+      "headline":   { "size": "17px", "weight": 600, "leading": 1.24, "tracking": "-0.022em", "family": "body" },
+      "body":       { "size": "17px", "weight": 400, "leading": 1.47, "tracking": "-0.022em", "family": "body" },
+      "callout":    { "size": "14px", "weight": 400, "leading": 1.43, "tracking": "-0.016em", "family": "body" },
+      "caption":    { "size": "12px", "weight": 400, "leading": 1.33, "tracking": "0em", "family": "body" },
+      "stat":       { "size": "clamp(40px, 5vw, 60px)", "weight": 700, "family": "display" },
+      "mono":       { "size": "13px", "weight": 600, "tracking": "0.06em", "transform": "uppercase", "family": "mono" }
+    },
+    "ivyPrestoOriginal": {
+      "$note": "Production reference — Ivy Presto is the licensed font used on dna.online",
+      "headline": { "weights": [400, 700] },
+      "text": { "weights": [300, 400, 600, 700] }
+    }
+  },
+
+  "spacing": {
+    "unit": "8px",
+    "scale": {
+      "0": "0", "1": "4px", "2": "8px", "3": "12px", "4": "16px",
+      "5": "24px", "6": "32px", "7": "40px", "8": "48px", "9": "56px",
+      "10": "64px", "11": "80px", "12": "96px", "13": "120px", "14": "160px"
+    }
+  },
+
+  "grid": {
+    "columns": 12,
+    "gutter": "20px",
+    "margin": "max(20px, 5vw)",
+    "maxWidth": "1280px",
+    "innerWidth": "1200px"
+  },
+
+  "borderRadius": {
+    "xs": "4px", "sm": "8px", "md": "12px", "lg": "16px",
+    "xl": "24px", "2xl": "32px", "3xl": "48px", "pill": "980px",
+    "organic": {
+      "card": "60px 60px 60px 0px",
+      "alt": "80px 80px 80px 0px",
+      "reverse": "0px 60px 60px 60px",
+      "bottom": "0px 0px 50px 50px"
+    }
+  },
+
+  "shadows": {
+    "flat": {
+      "xs": "0 1px 2px rgba(3, 0, 0, 0.04)",
+      "sm": "0 2px 8px rgba(3, 0, 0, 0.06)",
+      "md": "0 4px 16px rgba(3, 0, 0, 0.08)",
+      "lg": "0 8px 32px rgba(3, 0, 0, 0.10)",
+      "xl": "0 16px 48px rgba(3, 0, 0, 0.12)",
+      "2xl": "0 24px 64px rgba(3, 0, 0, 0.16)"
+    },
+    "neumorphic": {
+      "raised": "6px 6px 16px rgba(3,0,0,0.08), -6px -6px 16px rgba(255,255,255,0.9)",
+      "pressed": "inset 4px 4px 8px rgba(3,0,0,0.06), inset -4px -4px 8px rgba(255,255,255,0.8)",
+      "soft": "8px 8px 24px rgba(3,0,0,0.06), -8px -8px 24px rgba(255,255,255,0.95)"
+    },
+    "glow": {
+      "mint": "0 0 40px rgba(131, 198, 163, 0.3)",
+      "red": "0 0 40px rgba(254, 2, 22, 0.2)"
+    }
+  },
+
+  "motion": {
+    "$description": "Apple-grade animation system. CSS keyframes + JS IntersectionObserver engine. All animations respect prefers-reduced-motion.",
+    "$files": {
+      "css": "dna-design-system-v2.css (Layer 5 patterns + Layer 6 keyframes)",
+      "js": "dna-animations.js (IntersectionObserver engine — REQUIRED)"
+    },
+
+    "duration": {
+      "instant": "100ms", "fast": "200ms", "normal": "320ms",
+      "slow": "500ms", "slower": "800ms", "cinematic": "1300ms"
+    },
+    "easing": {
+      "default": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+      "in": "cubic-bezier(0.42, 0, 1, 1)",
+      "out": "cubic-bezier(0, 0, 0.58, 1)",
+      "inOut": "cubic-bezier(0.42, 0, 0.58, 1)",
+      "spring": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "bounce": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "apple": "cubic-bezier(0.4, 0, 0.6, 1)"
+    },
+
+    "patterns": {
+      "scrollReveal": {
+        "$priority": "P0 — THE core Apple animation",
+        "cssClass": ".reveal",
+        "visibleClass": ".is-visible (added by JS)",
+        "behavior": "Elements start opacity:0 + translateY(24px), fade up when entering viewport",
+        "delays": ".reveal--delay-1 through --delay-4 (100ms increments)",
+        "engine": "IntersectionObserver in dna-animations.js",
+        "usage": "Add .reveal to ANY element. Apply to story cards, section headings, paragraphs, images."
+      },
+      "stagger": {
+        "$priority": "P0 — Sequential child reveal",
+        "cssClass": ".stagger (on parent)",
+        "behavior": "All direct children animate in sequence with 80ms delay between each",
+        "engine": "IntersectionObserver triggers parent, CSS handles child delays",
+        "usage": "Wrap a grid of cards in .stagger. Children auto-animate on scroll."
+      },
+      "heroCascade": {
+        "$priority": "P0 — Page load entrance",
+        "cssClass": ".hero-cascade (on section)",
+        "children": [
+          ".hero-cascade__eyebrow (0ms delay)",
+          ".hero-cascade__title (150ms delay)",
+          ".hero-cascade__subtitle (300ms delay)",
+          ".hero-cascade__actions (450ms delay)",
+          ".hero-cascade__media (600ms delay, uses scale instead of translateY)"
+        ],
+        "behavior": "Fires on DOMContentLoaded. Each child enters sequentially with spring easing.",
+        "engine": "JS sets initial state then triggers after 2 frames"
+      },
+      "countUp": {
+        "$priority": "P1 — Dashboard stat numbers",
+        "cssClass": ".count-up",
+        "attributes": "data-target='12456' data-duration='1500' data-prefix='£' data-suffix='%' data-separator=','",
+        "behavior": "Number animates from 0 to target with ease-out deceleration",
+        "engine": "IntersectionObserver triggers, requestAnimationFrame drives count"
+      },
+      "parallax": {
+        "$priority": "P1 — Subtle depth",
+        "cssClass": ".parallax",
+        "attributes": "data-speed='0.12' (0.05=subtle, 0.3=dramatic)",
+        "behavior": "Element moves 10-15% slower than scroll. Creates depth between foreground/background.",
+        "engine": "Scroll listener with requestAnimationFrame"
+      },
+      "navIntensification": {
+        "$priority": "P1 — Premium scroll feedback",
+        "cssClass": ".nav (auto-detected)",
+        "behavior": "Nav glass background goes from 78% to 92% opacity after scrolling 100px",
+        "cssStates": ".nav (default) → .nav--scrolled (added by JS)",
+        "engine": "Scroll listener, class toggle"
+      },
+      "clipReveal": {
+        "$priority": "P2 — Directional image unveil",
+        "cssClass": ".clip-reveal",
+        "attributes": "data-direction='up|down|left|right'",
+        "behavior": "Image clips from edge and reveals with spring easing on scroll entry",
+        "engine": "IntersectionObserver, CSS clip-path transition"
+      },
+      "sectionBlend": {
+        "$priority": "P2 — Smooth section transitions",
+        "cssClass": ".section-blend",
+        "attributes": "data-bg-from='#FFF' data-bg-to='#161515' data-text-from='#030000' data-text-to='#F0EFEB'",
+        "behavior": "Background color interpolates as section scrolls into view",
+        "engine": "Scroll listener, JS color interpolation per frame"
+      },
+      "stickyScroll": {
+        "$priority": "P2 — Apple 'How it works' sections",
+        "cssClass": ".sticky-section",
+        "attributes": "data-steps='3'",
+        "children": ".sticky-section__pinned > .sticky-section__step[data-step='N']",
+        "behavior": "Section pins to viewport. Inner steps crossfade based on scroll progress.",
+        "engine": "CSS position:sticky + JS scroll-to-step mapping"
+      },
+      "cardTilt": {
+        "$priority": "P3 — Physical depth on hover",
+        "cssClass": ".card-tilt",
+        "attributes": "data-tilt-max='8'",
+        "behavior": "Card rotates in 3D following cursor position. Max 8 degrees default.",
+        "engine": "JS mousemove listener, CSS perspective transform"
+      },
+      "magneticButton": {
+        "$priority": "P3 — Premium CTA micro-interaction",
+        "cssClass": ".btn-magnetic",
+        "behavior": "Button follows cursor slightly on hover (30% of mouse offset)",
+        "engine": "JS mousemove listener, CSS translate"
+      },
+      "scrollProgress": {
+        "$priority": "P3 — Reading progress",
+        "cssClass": ".scroll-progress",
+        "behavior": "Thin mint bar at top of page showing scroll percentage",
+        "engine": "JS scroll listener, width percentage"
+      }
+    },
+
+    "keyframes": {
+      "spin": "rotate(0) → rotate(360deg), 3s linear infinite",
+      "scaleIn": "scale(0.92)+opacity:0 → scale(1)+opacity:1, 800ms spring",
+      "slideUp": "translateY(32px)+opacity:0 → translateY(0)+opacity:1, 600ms spring",
+      "slideInLeft": "translateX(-40px)+opacity:0 → translateX(0)+opacity:1, 600ms spring",
+      "fadeIn": "opacity:0 → opacity:1, 500ms default",
+      "pulseGlow": "box-shadow pulsing mint glow, 2s infinite",
+      "float": "translateY(0) → translateY(-8px), 3s infinite",
+      "countUp": "opacity + translateY reveal (triggered by JS)",
+      "skeletonShimmer": "gradient position 200% → -200%, 1.5s infinite",
+      "marqueeScroll": "translateX(0) → translateX(-50%), 30s linear infinite"
+    },
+
+    "utilities": {
+      "classes": ".animate-spin, .animate-scale-in, .animate-slide-up, .animate-slide-left, .animate-fade-in, .animate-float, .animate-pulse",
+      "delays": ".animate-delay-1 through .animate-delay-6 (100ms increments)",
+      "hover": ".hover:scale-up, .hover:lift, .hover:glow-mint, .hover:glow-red"
+    },
+
+    "cssOnlyEffects": {
+      "hoverLift": ".hover-lift — translateY(-4px) on hover with cinematic timing",
+      "cardImageZoom": ".card-image-zoom — img scales 1.03x when parent .card is hovered",
+      "gradientText": ".gradient-text — sunset gradient on text (Apple hero style)",
+      "backgroundOrbs": ".orb — decorative blurred circles (.orb--mint, .orb--pink, .orb--warm × .orb--sm/md/lg)"
+    },
+
+    "jsApi": {
+      "$description": "All animations exposed on window.DNAAnimations for React/SPA re-initialization",
+      "methods": "window.DNAAnimations.init() — re-init all. Individual: initScrollReveal(), initStagger(), initHeroCascade(), initCountUp(), initParallax(), initNavIntensification(), initClipReveal(), initSectionBlend(), initStickyScroll(), initCardTilt(), initMagneticButtons(), initScrollProgress()"
+    }
+  },
+
+  "breakpoints": {
+    "$system": "Apple-aligned",
+    "mobile": "0–734px",
+    "tablet": "735–1068px",
+    "desktop": "1069px+",
+    "wide": "1440px+"
+  },
+
+  "zIndex": {
+    "base": 0, "dropdown": 100, "sticky": 200, "overlay": 300,
+    "modal": 400, "toast": 500, "nav": 600, "tooltip": 700
+  },
+
+  "components": {
+    "nav": "Fixed pill, glass-dark, intensifies on scroll, pill active item with mint bg",
+    "buttons": "Primary(green), Secondary(outlined), CTA(red), Ghost — all with inner shine on hover, press effect on active",
+    "tags": "Mono font, uppercase, 12px radius — green/dark/pink/muted/brand/warm/live/draft/error variants",
+    "cards": "Default(white+border), Neumorphic(shadow-neu), Glass(backdrop-blur), Organic DNA(asymmetric corners)",
+    "inputs": "Default(border), Neumorphic(inset shadow), Glass(transparent) — all with mint focus ring",
+    "toggle": "51×31px Apple-size, mint when checked, spring animation on knob",
+    "toast": "Pill shape, fixed bottom center, slide-up entrance with spring",
+    "modal": "scale(0.95)+translateY → scale(1), overlay blur(8px)",
+    "accordion": "+/× trigger, max-height transition, spring easing",
+    "tabs": "Bottom border indicator, brand-primary active color",
+    "breadcrumbs": "/ separated, hover to brand-primary",
+    "chips": "Pill filter tags, active state fills with brand-primary",
+    "skeleton": "Shimmer gradient animation for loading states",
+    "progress": "4px bar with mint fill, spring width transition",
+    "sidebar": "CMS left sidebar, dark green, active indicator bar, section labels in mono",
+    "table": "Minimal borders (separator-default), hover row highlight",
+    "uploadZone": "Dashed border, hover turns mint, WeTransfer-inspired",
+    "mediaCart": "Red notification badge on cart icon",
+    "footer": "Dark bg, rounded-2xl top corners, tricolor logo, grid layout",
+    "hero": "Centered, eyebrow→title→subtitle→actions cascade",
+    "stats": "Red numbers (stat font), centered row",
+    "featureBlock": "Apple-style centered showcase with neon eyebrow",
+    "ctaSection": "Centered with decorative DNA shapes behind",
+    "bentoGrid": "12-column Apple-style grid with span utilities",
+    "marquee": "Infinite scroll with gradient mask edges for logos"
+  },
+
+  "accessibility": {
+    "focusVisible": "2px solid mint, 3px offset",
+    "reducedMotion": "All animations disabled, reveals show immediately",
+    "highContrast": "Stronger separators, thicker borders",
+    "srOnly": "Visually hidden but screen-reader accessible",
+    "skipLink": "Skip to content for keyboard navigation"
+  }
+}
