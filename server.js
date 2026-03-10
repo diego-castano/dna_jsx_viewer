@@ -7,7 +7,9 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const adapter = new PrismaPg(process.env.DATABASE_URL);
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
