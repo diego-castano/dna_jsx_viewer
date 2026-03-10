@@ -152,6 +152,41 @@ app.get('/api/files/:id/content', async (req, res) => {
   }
 });
 
+// ── API: List comments for a file ──
+app.get('/api/files/:id/comments', async (req, res) => {
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { fileId: req.params.id },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json(comments);
+  } catch (e) {
+    console.error('GET /api/files/:id/comments error:', e);
+    res.status(500).json({ error: 'Failed to fetch comments' });
+  }
+});
+
+// ── API: Add comment to a file ──
+app.post('/api/files/:id/comments', async (req, res) => {
+  try {
+    const { author, content, color } = req.body;
+    if (!author || !content) return res.status(400).json({ error: 'Author and content required' });
+
+    const comment = await prisma.comment.create({
+      data: {
+        fileId: req.params.id,
+        author: author.trim().slice(0, 50),
+        content: content.trim().slice(0, 500),
+        color: color || '',
+      },
+    });
+    res.json(comment);
+  } catch (e) {
+    console.error('POST /api/files/:id/comments error:', e);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
 // ── SPA fallback ──
 app.get('{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

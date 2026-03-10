@@ -7,15 +7,28 @@ datasource db {
 }
 
 model File {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   filename      String
-  title         String   @default("")
-  description   String   @default("")
+  title         String    @default("")
+  description   String    @default("")
   size          Int
   url           String
-  cloudinaryId  String   @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  cloudinaryId  String    @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  comments      Comment[]
 
   @@map("files")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  fileId    String
+  author    String
+  content   String
+  color     String   @default("")
+  createdAt DateTime @default(now())
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
 }
