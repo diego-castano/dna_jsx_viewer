@@ -1,0 +1,55 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract cloud name from CLOUDINARY_URL
+        id: cloudinary
+        run: |
+          # CLOUDINARY_URL format: cloudinary://api_key:api_secret@cloud_name
+          CLOUD_NAME=$(echo "${{ secrets.CLOUDINARY_URL }}" | sed 's|cloudinary://.*@||')
+          echo "cloud_name=$CLOUD_NAME" >> $GITHUB_OUTPUT
+
+      - name: Inject Cloudinary credentials
+        env:
+          CLOUD_NAME: ${{ steps.cloudinary.outputs.cloud_name }}
+          API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          API_SECRET: ${{ secrets.CLOUD_API_SECRET }}
+        run: |
+          sed -i "s|__CLOUD_NAME__|${CLOUD_NAME}|g" index.html
+          sed -i "s|__API_KEY__|${API_KEY}|g" index.html
+          sed -i "s|__API_SECRET__|${API_SECRET}|g" index.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
