@@ -168,7 +168,7 @@
     .file-item:hover .file-item__delete { opacity: 1; }
 
     /* ── Viewer ── */
-    .viewer { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .viewer { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 
     .viewer__toolbar {
       padding: 12px 24px; display: flex; align-items: center; gap: 12px;
@@ -178,27 +178,45 @@
     .viewer__filename {
       font-family: var(--font-mono, 'JetBrains Mono', monospace);
       font-size: 13px; font-weight: 600; color: var(--label-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1;
     }
     .viewer__line-count {
       font-family: var(--font-mono, 'JetBrains Mono', monospace);
       font-size: 11px; color: var(--label-tertiary);
     }
-    .viewer__actions { display: flex; gap: 8px; margin-left: auto; }
+    .viewer__actions { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
     .viewer__btn {
-      font-family: var(--font-body, 'DM Sans', sans-serif); font-size: 12px; font-weight: 600;
-      padding: 6px 14px; border-radius: 980px;
+      font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 11px; font-weight: 600;
+      padding: 5px 12px; border-radius: 980px;
       border: 1px solid var(--separator-default, rgba(3,0,0,0.08));
-      background: var(--surface-tertiary, #fff); color: var(--label-secondary);
-      cursor: pointer; transition: all 200ms;
+      background: var(--surface-tertiary, #fff); color: var(--label-tertiary, rgba(3,0,0,0.45));
+      cursor: pointer; transition: all 200ms; letter-spacing: 0.02em;
     }
-    .viewer__btn:hover {
-      background: var(--surface-brand, #2C4135); color: var(--label-on-dark, #F0EFEB);
-      border-color: var(--surface-brand);
-    }
-    .viewer__btn--active {
-      background: var(--surface-brand, #2C4135); color: var(--label-on-dark, #F0EFEB);
-      border-color: var(--surface-brand);
-    }
+    .viewer__btn:hover { opacity: 0.85; }
+
+    /* View mode buttons — each with its own DNA color */
+    #btnVisual { border-color: rgba(131,198,163,0.3); color: #2C4135; }
+    #btnVisual.viewer__btn--active { background: #83C6A3; color: #2C4135; border-color: #83C6A3; }
+    #btnVisual:hover:not(.viewer__btn--active) { background: rgba(131,198,163,0.1); }
+
+    #btnCode { border-color: rgba(44,65,53,0.2); color: #2C4135; }
+    #btnCode.viewer__btn--active { background: #2C4135; color: #F0EFEB; border-color: #2C4135; }
+    #btnCode:hover:not(.viewer__btn--active) { background: rgba(44,65,53,0.06); }
+
+    #btnRaw { border-color: rgba(3,0,0,0.1); color: var(--label-secondary, #333); }
+    #btnRaw.viewer__btn--active { background: #1d1f21; color: #c5c8c6; border-color: #1d1f21; }
+    #btnRaw:hover:not(.viewer__btn--active) { background: rgba(3,0,0,0.04); }
+
+    /* Utility buttons */
+    #btnWrap { border-color: rgba(255,149,0,0.2); color: #FF9500; }
+    #btnWrap.viewer__btn--active { background: #FF9500; color: #fff; border-color: #FF9500; }
+    #btnWrap:hover:not(.viewer__btn--active) { background: rgba(255,149,0,0.06); }
+
+    #btnCopy { border-color: rgba(52,199,89,0.2); color: #34C759; }
+    #btnCopy:hover { background: rgba(52,199,89,0.08); }
+
+    #btnDownload { border-color: rgba(254,2,22,0.15); color: #FE0216; }
+    #btnDownload:hover { background: rgba(254,2,22,0.06); }
 
     /* ── Meta bar (title + description) ── */
     .viewer__meta {
@@ -373,7 +391,7 @@
 
       <!-- Visual preview -->
       <div class="viewer__visual" id="visualView">
-        <iframe id="previewFrame" sandbox="allow-scripts"></iframe>
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
         <div class="viewer__visual-error" id="previewError">
           <div style="font-size:32px;">&#x26A0;</div>
           <div id="previewErrorMsg">Preview error</div>
@@ -633,18 +651,20 @@
       if (!activeContent) return;
       previewError.classList.remove('is-visible');
 
-      // Transform: strip imports, find default export or last component
       let code = activeContent;
 
-      // Remove import statements
-      code = code.replace(/^import\s+.*?[;\n]/gm, '');
+      // Remove all import statements (single and multi-line)
+      code = code.replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '');
+      code = code.replace(/^import\s+['"][^'"]+['"];?\s*$/gm, '');
 
       // Remove "export default" but keep the expression
       code = code.replace(/export\s+default\s+/g, '');
+      // Remove named exports: "export const" → "const", "export function" → "function"
+      code = code.replace(/export\s+(const|function|class|let|var)\s/g, '$1 ');
 
-      // Find component name: "const ComponentName = " or "function ComponentName"
-      const fnMatch = code.match(/(?:const|function)\s+([A-Z][A-Za-z0-9]*)/);
-      const componentName = fnMatch ? fnMatch[1] : null;
+      // Find ALL component names (PascalCase functions/consts) — pick the last one as main
+      const allMatches = [...code.matchAll(/(?:const|function)\s+([A-Z][A-Za-z0-9]*)/g)];
+      const componentName = allMatches.length ? allMatches[allMatches.length - 1][1] : null;
 
       const iframeHtml = `<!DOCTYPE html>
 <html>
@@ -653,22 +673,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; }
+    #root { min-height: 100vh; }
   </style>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+  <script src="https://unpkg.com/react@18/umd/react.development.min.js"><\/script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.min.js"><\/script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"><\/script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel" data-type="module">
-    const { useState, useEffect, useRef, useCallback, useMemo, useContext, createContext, Fragment } = React;
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      window.parent.postMessage({ type: 'preview-error', message: (err && err.message) || msg }, '*');
+      return true;
+    };
+  <\/script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, useMemo, useContext, createContext, Fragment, memo, forwardRef, useReducer, useLayoutEffect, useId } = React;
 
     ${code}
 
     ${componentName ? `
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(${componentName}));
+    try {
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(${componentName}));
+    } catch(e) {
+      window.parent.postMessage({ type: 'preview-error', message: e.message }, '*');
+      document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;color:#FF3B30;font-family:monospace;font-size:13px;">' + e.message + '</div>';
+    }
     ` : `
     document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;color:#999;">No renderable component found</div>';
     `}
