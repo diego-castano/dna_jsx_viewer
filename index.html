@@ -36,11 +36,13 @@
       z-index: 10;
     }
     .topbar__logo {
-      font-family: var(--font-display, 'Playfair Display', serif);
-      font-size: 11px;
-      letter-spacing: 3px;
-      color: rgba(240,239,235,0.5);
-      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+    }
+    .topbar__logo img {
+      height: 32px;
+      width: auto;
+      display: block;
     }
     .topbar__title {
       font-family: var(--font-display, 'Playfair Display', serif);
@@ -563,7 +565,9 @@
 
   <!-- Top Bar -->
   <div class="topbar">
-    <span class="topbar__logo">DNA</span>
+    <span class="topbar__logo">
+      <img src="logo.avif" alt="DNA">
+    </span>
     <span class="topbar__title">JSX Viewer</span>
     <span class="topbar__badge">v2.0</span>
     <div class="topbar__status" id="cloudStatus">
