@@ -734,7 +734,8 @@
     // ═══════════════════════════════════════
     // CLOUDINARY: UPLOAD (CORS-safe)
     // ═══════════════════════════════════════
-    async function cloudUpload(publicId, content, contentType) {
+    async function cloudUpload(publicId, content, contentType, opts) {
+      opts = opts || {};
       const timestamp = Math.floor(Date.now() / 1000);
       const params = {
         overwrite: 'true',
@@ -742,6 +743,7 @@
         tags: 'jsx_viewer',
         timestamp: timestamp.toString()
       };
+      if (opts.invalidate) params.invalidate = 'true';
       const signature = await generateSignature(params);
 
       const fd = new FormData();
@@ -752,6 +754,7 @@
       fd.append('public_id', publicId);
       fd.append('tags', 'jsx_viewer');
       fd.append('overwrite', 'true');
+      if (opts.invalidate) fd.append('invalidate', 'true');
       fd.append('resource_type', 'raw');
 
       const res = await fetch(
@@ -769,17 +772,10 @@
     // ═══════════════════════════════════════
     async function loadManifest() {
       try {
-        // Use stored version for guaranteed CDN cache busting
-        var storedVersion = localStorage.getItem('manifestVersion');
-        var url;
-        if (storedVersion) {
-          url = 'https://res.cloudinary.com/' + CLOUD_NAME +
-            '/raw/upload/v' + storedVersion + '/' + MANIFEST_ID;
-        } else {
-          url = 'https://res.cloudinary.com/' + CLOUD_NAME +
-            '/raw/upload/' + MANIFEST_ID + '?nocache=' + Date.now();
-        }
-        const res = await fetch(url);
+        // Always fetch fresh — bypass browser cache and CDN cache
+        const url = 'https://res.cloudinary.com/' + CLOUD_NAME +
+          '/raw/upload/' + MANIFEST_ID + '?nocache=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) {
           if (res.status === 404) return []; // No manifest yet
           throw new Error('Manifest fetch failed: ' + res.status);
@@ -797,11 +793,8 @@
     async function saveManifest(entries) {
       // entries = [{ name, date, size, url }, ...]
       const json = JSON.stringify(entries, null, 2);
-      const result = await cloudUpload(MANIFEST_ID, json, 'application/json');
-      // Store version so next loadManifest() fetches the exact updated version
-      if (result && result.version) {
-        localStorage.setItem('manifestVersion', result.version);
-      }
+      // invalidate: true purges Cloudinary CDN cache globally — all users get fresh manifest
+      await cloudUpload(MANIFEST_ID, json, 'application/json', { invalidate: true });
     }
 
     // ═══════════════════════════════════════
