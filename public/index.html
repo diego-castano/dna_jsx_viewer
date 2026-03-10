@@ -666,6 +666,9 @@
       const allMatches = [...code.matchAll(/(?:const|function)\s+([A-Z][A-Za-z0-9]*)/g)];
       const componentName = allMatches.length ? allMatches[allMatches.length - 1][1] : null;
 
+      // Escape backticks and backslashes in user code for template literal safety
+      const safeCode = code.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+
       const iframeHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -675,35 +678,49 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; }
     #root { min-height: 100vh; }
+    .preview-error { padding: 40px; text-align: center; color: #FF3B30; font-family: monospace; font-size: 13px; }
+    .preview-loading { padding: 40px; text-align: center; color: #999; font-family: sans-serif; font-size: 14px; }
   </style>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root"><div class="preview-loading">Loading preview...</div></div>
   <script>
     window.onerror = function(msg, src, line, col, err) {
       window.parent.postMessage({ type: 'preview-error', message: (err && err.message) || msg }, '*');
       return true;
     };
   <\/script>
-  <script type="text/babel">
-    const { useState, useEffect, useRef, useCallback, useMemo, useContext, createContext, Fragment, memo, forwardRef, useReducer, useLayoutEffect, useId } = React;
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+  <script>
+    (function() {
+      try {
+        var { useState, useEffect, useRef, useCallback, useMemo, useContext, createContext, Fragment, memo, forwardRef, useReducer, useLayoutEffect } = React;
 
-    ${code}
+        var jsxCode = ${JSON.stringify(code)};
+        ${componentName ? `jsxCode += "\\nvar __ROOT_COMP = " + ${JSON.stringify(componentName)} + ";";` : ''}
 
-    ${componentName ? `
-    try {
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(React.createElement(${componentName}));
-    } catch(e) {
-      window.parent.postMessage({ type: 'preview-error', message: e.message }, '*');
-      document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;color:#FF3B30;font-family:monospace;font-size:13px;">' + e.message + '</div>';
-    }
-    ` : `
-    document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;color:#999;">No renderable component found</div>';
-    `}
+        var transformed = Babel.transform(jsxCode, { presets: ['react'] }).code;
+        var fn = new Function('React', 'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'useContext', 'createContext', 'Fragment', 'memo', 'forwardRef', 'useReducer', 'useLayoutEffect', transformed + '; return typeof __ROOT_COMP !== "undefined" ? __ROOT_COMP : null;');
+        var Comp = fn(React, useState, useEffect, useRef, useCallback, useMemo, useContext, createContext, Fragment, memo, forwardRef, useReducer, useLayoutEffect);
+
+        ${componentName ? `
+        if (Comp) {
+          var root = ReactDOM.createRoot(document.getElementById('root'));
+          root.render(React.createElement(Comp));
+        } else {
+          document.getElementById('root').innerHTML = '<div class="preview-error">Component "${componentName}" not found after evaluation</div>';
+        }
+        ` : `
+        document.getElementById('root').innerHTML = '<div class="preview-error">No renderable component found</div>';
+        `}
+      } catch(e) {
+        window.parent.postMessage({ type: 'preview-error', message: e.message }, '*');
+        document.getElementById('root').innerHTML = '<div class="preview-error">' + e.message + '</div>';
+      }
+    })();
+  <\/script>
   <\/script>
   <script>
     window.addEventListener('error', function(e) {
