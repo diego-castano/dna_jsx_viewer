@@ -187,6 +187,32 @@ app.post('/api/files/:id/comments', async (req, res) => {
   }
 });
 
+// ── API: Update a comment ──
+app.patch('/api/comments/:id', async (req, res) => {
+  try {
+    const data = {};
+    if (req.body.content !== undefined) data.content = req.body.content.trim().slice(0, 500);
+    if (req.body.author !== undefined) data.author = req.body.author.trim().slice(0, 50);
+
+    const comment = await prisma.comment.update({ where: { id: req.params.id }, data });
+    res.json(comment);
+  } catch (e) {
+    console.error('PATCH /api/comments/:id error:', e);
+    res.status(500).json({ error: 'Update failed' });
+  }
+});
+
+// ── API: Delete a comment ──
+app.delete('/api/comments/:id', async (req, res) => {
+  try {
+    await prisma.comment.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('DELETE /api/comments/:id error:', e);
+    res.status(500).json({ error: 'Delete failed' });
+  }
+});
+
 // ── SPA fallback ──
 app.get('{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
